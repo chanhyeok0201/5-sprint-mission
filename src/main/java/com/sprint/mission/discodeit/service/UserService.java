@@ -15,7 +15,7 @@ public interface UserService {
   User create(UserCreateRequest userCreateRequest,
       Optional<BinaryContentCreateRequest> profileCreateRequest);
 
-  UserDto findById(UUID userId);
+  UserDto find(UUID userId);
 
   List<UserDto> findAll();
 
