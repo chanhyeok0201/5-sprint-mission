@@ -1,15 +1,23 @@
--- 테이블
--- User
-CREATE TABLE users
-(
-    id         uuid PRIMARY KEY,
-    created_at timestamp with time zone NOT NULL,
-    updated_at timestamp with time zone,
-    username   varchar(50) UNIQUE       NOT NULL,
-    email      varchar(100) UNIQUE      NOT NULL,
-    password   varchar(60)              NOT NULL,
-    profile_id uuid
-);
+-- ===========================================
+-- 1. 기존 테이블 모두 삭제
+-- ===========================================
+
+DROP TABLE IF EXISTS read_statuses CASCADE;
+DROP TABLE IF EXISTS message_attachments CASCADE;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS channels CASCADE;
+DROP TABLE IF EXISTS user_statuses CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
+DROP TABLE IF EXISTS binary_contents CASCADE;
+
+-- 기본 스키마 설정
+-- SET search_path TO public;
+
+-- 그 다음 테이블 생성 스크립트 실행
+
+-- ===========================================
+-- 2. 테이블 재생성
+-- ===========================================
 
 -- BinaryContent
 CREATE TABLE binary_contents
@@ -19,7 +27,19 @@ CREATE TABLE binary_contents
     file_name    varchar(255)             NOT NULL,
     size         bigint                   NOT NULL,
     content_type varchar(100)             NOT NULL
---     ,bytes        bytea        NOT NULL
+);
+
+-- User
+CREATE TABLE users
+(
+    id         uuid PRIMARY KEY,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone,
+    username   varchar(50) UNIQUE       NOT NULL,
+    email      varchar(100) UNIQUE      NOT NULL,
+    role       VARCHAR(20)              NOT NULL DEFAULT 'USER',
+    password   varchar(60)              NOT NULL,
+    profile_id uuid
 );
 
 -- UserStatus
@@ -74,8 +94,10 @@ CREATE TABLE read_statuses
     UNIQUE (user_id, channel_id)
 );
 
+-- ===========================================
+-- 3. 외래 키 제약 조건 추가
+-- ===========================================
 
--- 제약 조건
 -- User (1) -> BinaryContent (1)
 ALTER TABLE users
     ADD CONSTRAINT fk_user_binary_content
@@ -118,9 +140,12 @@ ALTER TABLE read_statuses
             REFERENCES users (id)
             ON DELETE CASCADE;
 
--- ReadStatus (N) -> User (1)
+-- ReadStatus (N) -> Channel (1)
 ALTER TABLE read_statuses
     ADD CONSTRAINT fk_read_status_channel
         FOREIGN KEY (channel_id)
             REFERENCES channels (id)
             ON DELETE CASCADE;
+
+DROP TABLE IF EXISTS user_statuses CASCADE;
+SELECT * FROM users;
